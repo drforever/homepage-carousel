@@ -1,0 +1,6 @@
+en:
+  theme_metadata:
+    description: "A beautiful carousel/slider component for the homepage"
+  carousel:
+    previous: "Previous"
+    next: "Next"

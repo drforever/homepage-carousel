@@ -1,0 +1,6 @@
+zh_CN:
+  theme_metadata:
+    description: "首页轮播图组件"
+  carousel:
+    previous: "上一张"
+    next: "下一张"

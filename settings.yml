@@ -1,0 +1,29 @@
+carousel_enabled:
+  type: bool
+  default: true
+  description: "启用首页轮播图"
+
+carousel_autoplay:
+  type: bool
+  default: true
+  description: "启用自动播放"
+
+carousel_interval:
+  type: integer
+  default: 5000
+  min: 1000
+  max: 30000
+  description: "自动播放间隔（毫秒）"
+
+carousel_height:
+  type: integer
+  default: 300
+  min: 100
+  max: 600
+  description: "轮播图高度（像素）"
+
+carousel_slides:
+  type: list
+  default: ""
+  list_type: simple
+  description: "轮播图配置，每行一个，格式: 图片URL|标题|链接URL"

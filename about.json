@@ -1,0 +1,9 @@
+{
+  "name": "Homepage Carousel",
+  "about_url": "",
+  "license_url": "",
+  "authors": "OrcaSpace",
+  "theme_version": "1.0.0",
+  "minimum_discourse_version": "3.0.0",
+  "component": true
+}
