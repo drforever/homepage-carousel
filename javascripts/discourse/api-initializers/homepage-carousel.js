@@ -1,38 +1,36 @@
 import { apiInitializer } from "discourse/lib/api";
 
 export default apiInitializer("1.0.0", (api) => {
-  const settings = api.container.lookup("service:site-settings");
-  
-  // 检查是否启用
-  if (!settings.carousel_enabled) {
-    return;
-  }
+  // 主题组件设置通过 settings 全局变量访问
+  const themeSettings = settings;
+
+  // 默认示例幻灯片
+  const defaultSlides = [
+    {
+      image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=400&fit=crop",
+      title: "欢迎来到 OrcaSpace",
+      link: "/",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=400&fit=crop",
+      title: "探索精彩话题",
+      link: "/categories",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=1200&h=400&fit=crop",
+      title: "加入我们的社区",
+      link: "/about",
+    },
+  ];
 
   // 解析轮播图配置
   const parseSlides = () => {
-    const slidesConfig = settings.carousel_slides || "";
+    const slidesConfig = themeSettings.carousel_slides || "";
     if (!slidesConfig.trim()) {
-      // 默认示例幻灯片
-      return [
-        {
-          image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=400&fit=crop",
-          title: "欢迎来到 OrcaSpace",
-          link: "/",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=400&fit=crop",
-          title: "探索精彩话题",
-          link: "/categories",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=1200&h=400&fit=crop",
-          title: "加入我们的社区",
-          link: "/about",
-        },
-      ];
+      return defaultSlides;
     }
 
-    return slidesConfig
+    const parsed = slidesConfig
       .split("|")
       .filter((line) => line.trim())
       .map((line) => {
@@ -44,16 +42,14 @@ export default apiInitializer("1.0.0", (api) => {
         };
       })
       .filter((slide) => slide.image);
+
+    return parsed.length > 0 ? parsed : defaultSlides;
   };
 
   const slides = parseSlides();
-  if (slides.length === 0) {
-    return;
-  }
-
-  const height = settings.carousel_height || 300;
-  const autoplay = settings.carousel_autoplay !== false;
-  const interval = settings.carousel_interval || 5000;
+  const height = themeSettings.carousel_height || 300;
+  const autoplay = themeSettings.carousel_autoplay !== false;
+  const interval = themeSettings.carousel_interval || 5000;
 
   // 创建轮播图 HTML
   const createCarouselHTML = () => {
@@ -130,7 +126,6 @@ export default apiInitializer("1.0.0", (api) => {
       }
     };
 
-    // 事件绑定
     prevBtn?.addEventListener("click", () => {
       goToSlide(currentIndex - 1);
       startAutoplay();
@@ -148,73 +143,77 @@ export default apiInitializer("1.0.0", (api) => {
       });
     });
 
-    // 鼠标悬停暂停
     container.addEventListener("mouseenter", stopAutoplay);
     container.addEventListener("mouseleave", startAutoplay);
 
-    // 触摸滑动支持
     let touchStartX = 0;
     container.addEventListener("touchstart", (e) => {
       touchStartX = e.touches[0].clientX;
       stopAutoplay();
-    });
+    }, { passive: true });
 
     container.addEventListener("touchend", (e) => {
       const touchEndX = e.changedTouches[0].clientX;
       const diff = touchStartX - touchEndX;
       if (Math.abs(diff) > 50) {
-        if (diff > 0) {
-          goToSlide(currentIndex + 1);
-        } else {
-          goToSlide(currentIndex - 1);
-        }
+        goToSlide(diff > 0 ? currentIndex + 1 : currentIndex - 1);
       }
       startAutoplay();
-    });
+    }, { passive: true });
 
-    // 开始自动播放
     startAutoplay();
   };
 
-  // 在首页插入轮播图
-  api.onPageChange((url) => {
-    // 只在首页显示
-    if (url !== "/" && !url.startsWith("/latest") && !url.startsWith("/categories") && !url.startsWith("/top")) {
+  // 插入轮播图的函数
+  const insertCarousel = () => {
+    if (document.querySelector(".homepage-carousel")) {
       return;
     }
 
-    // 延迟执行以确保 DOM 已渲染
-    setTimeout(() => {
-      // 检查是否已存在
-      if (document.querySelector(".homepage-carousel")) {
-        return;
-      }
+    const insertTargets = [
+      ".navigation-container",
+      ".list-controls", 
+      "#main-outlet .container",
+      "#main-outlet",
+    ];
 
-      // 查找插入位置 - 在导航栏上方
-      const insertTargets = [
-        ".navigation-container",
-        ".list-controls",
-        "#main-outlet .container",
-        "#main-outlet",
-      ];
+    let targetElement = null;
+    for (const selector of insertTargets) {
+      targetElement = document.querySelector(selector);
+      if (targetElement) break;
+    }
 
-      let targetElement = null;
-      for (const selector of insertTargets) {
-        targetElement = document.querySelector(selector);
-        if (targetElement) break;
-      }
+    if (!targetElement) return;
 
-      if (!targetElement) return;
+    const carouselDiv = document.createElement("div");
+    carouselDiv.innerHTML = createCarouselHTML();
+    const carousel = carouselDiv.firstElementChild;
 
-      // 创建并插入轮播图
-      const carouselDiv = document.createElement("div");
-      carouselDiv.innerHTML = createCarouselHTML();
-      const carousel = carouselDiv.firstElementChild;
+    targetElement.parentNode.insertBefore(carousel, targetElement);
+    initCarousel(carousel);
+  };
 
-      targetElement.parentNode.insertBefore(carousel, targetElement);
+  // 监听页面变化
+  api.onPageChange((url) => {
+    // 移除旧的轮播图
+    const existing = document.querySelector(".homepage-carousel");
+    if (existing) {
+      existing.remove();
+    }
 
-      // 初始化交互逻辑
-      initCarousel(carousel);
-    }, 100);
+    // 只在首页相关页面显示
+    const isHomePage = url === "/" || 
+                       url.startsWith("/latest") || 
+                       url.startsWith("/categories") || 
+                       url.startsWith("/top") ||
+                       url.startsWith("/new") ||
+                       url.startsWith("/unread");
+    
+    if (!isHomePage) return;
+
+    // 多次尝试插入，确保 DOM 已加载
+    setTimeout(insertCarousel, 100);
+    setTimeout(insertCarousel, 500);
+    setTimeout(insertCarousel, 1000);
   });
 });
