@@ -165,8 +165,11 @@ export default apiInitializer("1.0.0", (api) => {
   };
 
   // 插入轮播图的函数
+  let isInserted = false;
+  
   const insertCarousel = () => {
-    if (document.querySelector(".homepage-carousel")) {
+    // 双重检查防止重复
+    if (isInserted || document.querySelector(".homepage-carousel")) {
       return;
     }
 
@@ -185,6 +188,9 @@ export default apiInitializer("1.0.0", (api) => {
 
     if (!targetElement) return;
 
+    // 标记已插入
+    isInserted = true;
+
     const carouselDiv = document.createElement("div");
     carouselDiv.innerHTML = createCarouselHTML();
     const carousel = carouselDiv.firstElementChild;
@@ -195,11 +201,12 @@ export default apiInitializer("1.0.0", (api) => {
 
   // 监听页面变化
   api.onPageChange((url) => {
-    // 移除旧的轮播图
+    // 移除旧的轮播图并重置状态
     const existing = document.querySelector(".homepage-carousel");
     if (existing) {
       existing.remove();
     }
+    isInserted = false;
 
     // 只在首页相关页面显示
     const isHomePage = url === "/" || 
@@ -211,9 +218,7 @@ export default apiInitializer("1.0.0", (api) => {
     
     if (!isHomePage) return;
 
-    // 多次尝试插入，确保 DOM 已加载
-    setTimeout(insertCarousel, 100);
-    setTimeout(insertCarousel, 500);
-    setTimeout(insertCarousel, 1000);
+    // 延迟插入，确保 DOM 已加载
+    setTimeout(insertCarousel, 200);
   });
 });
