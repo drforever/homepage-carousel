@@ -17,82 +17,112 @@ carousel_interval:
 
 carousel_height:
   type: integer
-  default: 300
-  min: 100
-  max: 600
+  default: 280
+  min: 150
+  max: 500
   description: "轮播图高度（像素）"
 
-carousel_slide_1:
-  type: upload
+# 幻灯片 1
+carousel_tag_1:
+  type: string
   default: ""
-  description: "轮播图片 1"
+  description: "幻灯片1 - 标签（如：🔥 热门活动）"
 
 carousel_title_1:
   type: string
   default: ""
-  description: "轮播图片 1 标题"
+  description: "幻灯片1 - 标题（用 | 分隔主标题和高亮副标题，如：AI 创新挑战赛|获奖名单现已公布）"
+
+carousel_btn_1:
+  type: string
+  default: ""
+  description: "幻灯片1 - 按钮文字"
 
 carousel_link_1:
   type: string
   default: "/"
-  description: "轮播图片 1 链接"
+  description: "幻灯片1 - 跳转链接"
 
-carousel_slide_2:
-  type: upload
+# 幻灯片 2
+carousel_tag_2:
+  type: string
   default: ""
-  description: "轮播图片 2"
+  description: "幻灯片2 - 标签"
 
 carousel_title_2:
   type: string
   default: ""
-  description: "轮播图片 2 标题"
+  description: "幻灯片2 - 标题（用 | 分隔）"
+
+carousel_btn_2:
+  type: string
+  default: ""
+  description: "幻灯片2 - 按钮文字"
 
 carousel_link_2:
   type: string
   default: "/"
-  description: "轮播图片 2 链接"
+  description: "幻灯片2 - 跳转链接"
 
-carousel_slide_3:
-  type: upload
+# 幻灯片 3
+carousel_tag_3:
+  type: string
   default: ""
-  description: "轮播图片 3"
+  description: "幻灯片3 - 标签"
 
 carousel_title_3:
   type: string
   default: ""
-  description: "轮播图片 3 标题"
+  description: "幻灯片3 - 标题（用 | 分隔）"
+
+carousel_btn_3:
+  type: string
+  default: ""
+  description: "幻灯片3 - 按钮文字"
 
 carousel_link_3:
   type: string
   default: "/"
-  description: "轮播图片 3 链接"
+  description: "幻灯片3 - 跳转链接"
 
-carousel_slide_4:
-  type: upload
+# 幻灯片 4
+carousel_tag_4:
+  type: string
   default: ""
-  description: "轮播图片 4"
+  description: "幻灯片4 - 标签"
 
 carousel_title_4:
   type: string
   default: ""
-  description: "轮播图片 4 标题"
+  description: "幻灯片4 - 标题（用 | 分隔）"
+
+carousel_btn_4:
+  type: string
+  default: ""
+  description: "幻灯片4 - 按钮文字"
 
 carousel_link_4:
   type: string
   default: "/"
-  description: "轮播图片 4 链接"
+  description: "幻灯片4 - 跳转链接"
 
-carousel_slide_5:
-  type: upload
+# 幻灯片 5
+carousel_tag_5:
+  type: string
   default: ""
-  description: "轮播图片 5"
+  description: "幻灯片5 - 标签"
 
 carousel_title_5:
   type: string
   default: ""
-  description: "轮播图片 5 标题"
+  description: "幻灯片5 - 标题（用 | 分隔）"
+
+carousel_btn_5:
+  type: string
+  default: ""
+  description: "幻灯片5 - 按钮文字"
 
 carousel_link_5:
   type: string
   default: "/"
-  description: "轮播图片 5 链接"
+  description: "幻灯片5 - 跳转链接"
