@@ -22,8 +22,77 @@ carousel_height:
   max: 600
   description: "轮播图高度（像素）"
 
-carousel_slides:
-  type: list
+carousel_slide_1:
+  type: upload
   default: ""
-  list_type: simple
-  description: "轮播图配置，每行一个，格式: 图片URL|标题|链接URL"
+  description: "轮播图片 1"
+
+carousel_title_1:
+  type: string
+  default: ""
+  description: "轮播图片 1 标题"
+
+carousel_link_1:
+  type: string
+  default: "/"
+  description: "轮播图片 1 链接"
+
+carousel_slide_2:
+  type: upload
+  default: ""
+  description: "轮播图片 2"
+
+carousel_title_2:
+  type: string
+  default: ""
+  description: "轮播图片 2 标题"
+
+carousel_link_2:
+  type: string
+  default: "/"
+  description: "轮播图片 2 链接"
+
+carousel_slide_3:
+  type: upload
+  default: ""
+  description: "轮播图片 3"
+
+carousel_title_3:
+  type: string
+  default: ""
+  description: "轮播图片 3 标题"
+
+carousel_link_3:
+  type: string
+  default: "/"
+  description: "轮播图片 3 链接"
+
+carousel_slide_4:
+  type: upload
+  default: ""
+  description: "轮播图片 4"
+
+carousel_title_4:
+  type: string
+  default: ""
+  description: "轮播图片 4 标题"
+
+carousel_link_4:
+  type: string
+  default: "/"
+  description: "轮播图片 4 链接"
+
+carousel_slide_5:
+  type: upload
+  default: ""
+  description: "轮播图片 5"
+
+carousel_title_5:
+  type: string
+  default: ""
+  description: "轮播图片 5 标题"
+
+carousel_link_5:
+  type: string
+  default: "/"
+  description: "轮播图片 5 链接"

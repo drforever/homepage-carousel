@@ -4,46 +4,49 @@ export default apiInitializer("1.0.0", (api) => {
   // 主题组件设置通过 settings 全局变量访问
   const themeSettings = settings;
 
-  // 默认示例幻灯片
-  const defaultSlides = [
-    {
-      image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=400&fit=crop",
-      title: "欢迎来到 OrcaSpace",
-      link: "/",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=400&fit=crop",
-      title: "探索精彩话题",
-      link: "/categories",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=1200&h=400&fit=crop",
-      title: "加入我们的社区",
-      link: "/about",
-    },
-  ];
-
-  // 解析轮播图配置
+  // 解析轮播图配置 - 优先使用上传的图片
   const parseSlides = () => {
-    const slidesConfig = themeSettings.carousel_slides || "";
-    if (!slidesConfig.trim()) {
-      return defaultSlides;
+    const slides = [];
+    
+    // 检查上传的图片设置 (carousel_slide_1 到 carousel_slide_5)
+    for (let i = 1; i <= 5; i++) {
+      const slideKey = `carousel_slide_${i}`;
+      const titleKey = `carousel_title_${i}`;
+      const linkKey = `carousel_link_${i}`;
+      
+      const image = themeSettings[slideKey];
+      if (image) {
+        slides.push({
+          image: image,
+          title: themeSettings[titleKey] || "",
+          link: themeSettings[linkKey] || "/",
+        });
+      }
+    }
+    
+    // 如果有上传的图片，使用它们
+    if (slides.length > 0) {
+      return slides;
     }
 
-    const parsed = slidesConfig
-      .split("|")
-      .filter((line) => line.trim())
-      .map((line) => {
-        const parts = line.split(",").map((p) => p.trim());
-        return {
-          image: parts[0] || "",
-          title: parts[1] || "",
-          link: parts[2] || "/",
-        };
-      })
-      .filter((slide) => slide.image);
-
-    return parsed.length > 0 ? parsed : defaultSlides;
+    // 否则使用默认示例幻灯片
+    return [
+      {
+        image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=400&fit=crop",
+        title: "欢迎来到 OrcaSpace",
+        link: "/",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=400&fit=crop",
+        title: "探索精彩话题",
+        link: "/categories",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=1200&h=400&fit=crop",
+        title: "加入我们的社区",
+        link: "/about",
+      },
+    ];
   };
 
   const slides = parseSlides();
