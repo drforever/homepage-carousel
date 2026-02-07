@@ -118,8 +118,31 @@ export default apiInitializer("1.0.0", (api) => {
     `;
   };
 
-  // 初始化轮播图逻辑
-  const initCarousel = (container) => {
+  // 判断是否是需要显示轮播图的页面
+  const isCarouselPage = (url) => {
+    return url === "/" ||
+      url.startsWith("/latest") ||
+      url.startsWith("/categories") ||
+      url.startsWith("/top") ||
+      url.startsWith("/hot") ||
+      url.startsWith("/new") ||
+      url.startsWith("/unread");
+  };
+
+  // 轮播图实例引用
+  let carouselInstance = null;
+  let currentSlideIndex = 0;
+  let autoplayTimer = null;
+
+  // 创建轮播图元素
+  const createCarouselElement = () => {
+    const carouselDiv = document.createElement("div");
+    carouselDiv.innerHTML = createCarouselHTML();
+    return carouselDiv.firstElementChild;
+  };
+
+  // 初始化轮播图交互
+  const initCarouselInteraction = (container) => {
     if (slides.length <= 1) return;
 
     const slideEls = container.querySelectorAll(".carousel-slide");
@@ -127,27 +150,22 @@ export default apiInitializer("1.0.0", (api) => {
     const prevBtn = container.querySelector(".carousel-nav.prev");
     const nextBtn = container.querySelector(".carousel-nav.next");
 
-    let currentIndex = 0;
-    let autoplayTimer = null;
-
     const goToSlide = (index) => {
       if (index < 0) index = slides.length - 1;
       if (index >= slides.length) index = 0;
 
-      // 移除所有 active
       slideEls.forEach(el => el.classList.remove("active"));
       dots.forEach(el => el.classList.remove("active"));
 
-      // 添加当前 active
-      currentIndex = index;
-      slideEls[currentIndex].classList.add("active");
-      dots[currentIndex].classList.add("active");
+      currentSlideIndex = index;
+      slideEls[currentSlideIndex].classList.add("active");
+      dots[currentSlideIndex].classList.add("active");
     };
 
     const startAutoplay = () => {
       if (!autoplay) return;
       stopAutoplay();
-      autoplayTimer = setInterval(() => goToSlide(currentIndex + 1), interval);
+      autoplayTimer = setInterval(() => goToSlide(currentSlideIndex + 1), interval);
     };
 
     const stopAutoplay = () => {
@@ -158,12 +176,12 @@ export default apiInitializer("1.0.0", (api) => {
     };
 
     prevBtn?.addEventListener("click", () => {
-      goToSlide(currentIndex - 1);
+      goToSlide(currentSlideIndex - 1);
       startAutoplay();
     });
 
     nextBtn?.addEventListener("click", () => {
-      goToSlide(currentIndex + 1);
+      goToSlide(currentSlideIndex + 1);
       startAutoplay();
     });
 
@@ -177,7 +195,6 @@ export default apiInitializer("1.0.0", (api) => {
     container.addEventListener("mouseenter", stopAutoplay);
     container.addEventListener("mouseleave", startAutoplay);
 
-    // 触摸滑动支持
     let touchStartX = 0;
     container.addEventListener("touchstart", (e) => {
       touchStartX = e.touches[0].clientX;
@@ -188,7 +205,7 @@ export default apiInitializer("1.0.0", (api) => {
       const touchEndX = e.changedTouches[0].clientX;
       const diff = touchStartX - touchEndX;
       if (Math.abs(diff) > 50) {
-        goToSlide(diff > 0 ? currentIndex + 1 : currentIndex - 1);
+        goToSlide(diff > 0 ? currentSlideIndex + 1 : currentSlideIndex - 1);
       }
       startAutoplay();
     }, { passive: true });
@@ -196,71 +213,70 @@ export default apiInitializer("1.0.0", (api) => {
     startAutoplay();
   };
 
-  // 判断是否是需要显示轮播图的页面
-  const isCarouselPage = (url) => {
-    return url === "/" ||
-      url.startsWith("/latest") ||
-      url.startsWith("/categories") ||
-      url.startsWith("/top") ||
-      url.startsWith("/hot") ||
-      url.startsWith("/new") ||
-      url.startsWith("/unread");
-  };
-
-  // 插入轮播图
-  let isInserted = false;
-
-  const insertCarousel = () => {
-    if (isInserted || document.querySelector(".homepage-carousel")) {
+  // 显示轮播图
+  const showCarousel = () => {
+    // 如果已经存在且可见，不做任何操作
+    const existing = document.querySelector(".homepage-carousel");
+    if (existing) {
+      existing.style.display = "";
       return;
     }
 
-    const insertTargets = [
-      ".navigation-container",
-      ".list-controls",
-      "#main-outlet .container",
-      "#main-outlet",
-    ];
-
-    let targetElement = null;
-    for (const selector of insertTargets) {
-      targetElement = document.querySelector(selector);
-      if (targetElement) break;
+    // 找到插入位置 - 使用更稳定的容器
+    const mainOutlet = document.querySelector("#main-outlet");
+    if (!mainOutlet) {
+      setTimeout(showCarousel, 100);
+      return;
     }
 
-    if (!targetElement) return;
+    // 创建新的轮播图
+    carouselInstance = createCarouselElement();
+    mainOutlet.insertBefore(carouselInstance, mainOutlet.firstChild);
+    initCarouselInteraction(carouselInstance);
+  };
 
-    isInserted = true;
-
-    const carouselDiv = document.createElement("div");
-    carouselDiv.innerHTML = createCarouselHTML();
-    const carousel = carouselDiv.firstElementChild;
-
-    targetElement.parentNode.insertBefore(carousel, targetElement);
-    initCarousel(carousel);
+  // 隐藏轮播图（而不是删除）
+  const hideCarousel = () => {
+    const existing = document.querySelector(".homepage-carousel");
+    if (existing) {
+      existing.style.display = "none";
+    }
   };
 
   // 监听页面变化
   api.onPageChange((url) => {
-    const existing = document.querySelector(".homepage-carousel");
     const shouldShow = isCarouselPage(url);
 
-    // 如果当前页面需要显示轮播图，且轮播图已存在，则保留不动
-    if (shouldShow && existing) {
-      return;
+    if (shouldShow) {
+      // 延迟一点确保 DOM 已更新
+      setTimeout(showCarousel, 50);
+    } else {
+      hideCarousel();
     }
-
-    // 如果当前页面不需要显示轮播图，则移除
-    if (!shouldShow) {
-      if (existing) {
-        existing.remove();
-      }
-      isInserted = false;
-      return;
-    }
-
-    // 需要显示但不存在，则创建
-    isInserted = false;
-    setTimeout(insertCarousel, 200);
   });
+
+  // 使用 MutationObserver 监控轮播图是否被意外删除
+  const setupObserver = () => {
+    const mainOutlet = document.querySelector("#main-outlet");
+    if (!mainOutlet) {
+      setTimeout(setupObserver, 500);
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      const currentUrl = window.location.pathname;
+      const shouldShow = isCarouselPage(currentUrl);
+      const existing = document.querySelector(".homepage-carousel");
+
+      // 如果应该显示但不存在，重新创建
+      if (shouldShow && !existing) {
+        setTimeout(showCarousel, 50);
+      }
+    });
+
+    observer.observe(mainOutlet, { childList: true, subtree: false });
+  };
+
+  // 初始化
+  setupObserver();
 });
