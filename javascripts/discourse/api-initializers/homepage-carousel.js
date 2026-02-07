@@ -196,6 +196,17 @@ export default apiInitializer("1.0.0", (api) => {
     startAutoplay();
   };
 
+  // 判断是否是需要显示轮播图的页面
+  const isCarouselPage = (url) => {
+    return url === "/" ||
+      url.startsWith("/latest") ||
+      url.startsWith("/categories") ||
+      url.startsWith("/top") ||
+      url.startsWith("/hot") ||
+      url.startsWith("/new") ||
+      url.startsWith("/unread");
+  };
+
   // 插入轮播图
   let isInserted = false;
 
@@ -232,21 +243,24 @@ export default apiInitializer("1.0.0", (api) => {
   // 监听页面变化
   api.onPageChange((url) => {
     const existing = document.querySelector(".homepage-carousel");
-    if (existing) {
-      existing.remove();
+    const shouldShow = isCarouselPage(url);
+
+    // 如果当前页面需要显示轮播图，且轮播图已存在，则保留不动
+    if (shouldShow && existing) {
+      return;
     }
+
+    // 如果当前页面不需要显示轮播图，则移除
+    if (!shouldShow) {
+      if (existing) {
+        existing.remove();
+      }
+      isInserted = false;
+      return;
+    }
+
+    // 需要显示但不存在，则创建
     isInserted = false;
-
-    const isHomePage = url === "/" ||
-      url.startsWith("/latest") ||
-      url.startsWith("/categories") ||
-      url.startsWith("/top") ||
-      url.startsWith("/hot") ||
-      url.startsWith("/new") ||
-      url.startsWith("/unread");
-
-    if (!isHomePage) return;
-
     setTimeout(insertCarousel, 200);
   });
 });
