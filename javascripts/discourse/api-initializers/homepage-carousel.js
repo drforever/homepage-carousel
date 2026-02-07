@@ -241,6 +241,7 @@ export default apiInitializer("1.0.0", (api) => {
       url.startsWith("/latest") ||
       url.startsWith("/categories") ||
       url.startsWith("/top") ||
+      url.startsWith("/hot") ||
       url.startsWith("/new") ||
       url.startsWith("/unread");
 
